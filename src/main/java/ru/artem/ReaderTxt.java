@@ -13,7 +13,7 @@ public class ReaderTxt {
     public static final Logger log = Logger.getLogger(ReaderTxt.class.getName());
 
     public static LinkedList<Question> formatter() {
-        LinkedList<Question> list = new LinkedList<>();
+        LinkedHashSet<Question> list = new LinkedHashSet<>();
         list.add(new Question("Начало", new LinkedList<>(List.of("", "", "", "")), 0));
         String key_value = "";
         LinkedList<String> temp_list = new LinkedList<>();
@@ -52,7 +52,6 @@ public class ReaderTxt {
             log.log(Level.WARNING, ex.getMessage());
         }
         list.add(new Question("Конец", new LinkedList<>(List.of("", "", "", "")), 0));
-        log.log(Level.WARNING, list.toString());
-        return list;
+        return new LinkedList<>(list);
     }
 }
