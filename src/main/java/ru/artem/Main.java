@@ -8,12 +8,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.*;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class Main extends Application {
-    private static final LinkedList<Question> arr = ReaderTxt.formatter();
+    private static final LinkedList<QuestionDTO> arr = new LinkedList<>();
     private static int currentQuestion = 0;
     private static final Label questionLabel = new Label();
     private static final Button questionButton_1 = new Button();
@@ -24,46 +25,42 @@ public class Main extends Application {
             questionButton_3, questionButton_4));
     private static final Button previosButton = new Button("<--- Предыдущий вопрос");
     private static final Button nextQuestionButton = new Button("Следующий вопрос --->");
-    public static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
+        readQuestionsFromBinFile();
+        inQuestion(currentQuestion);
         Application.launch();
     }
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Тест"); // заголовок окна
-
+        stage.setTitle("Тест");
         nextQuestionButton.setOnAction(event -> showQuestion(nextQuestionButton));
         previosButton.setOnAction(event -> showQuestion(previosButton));
-        questionButton_1.setOnAction(event -> checkQuestion(questionButton_1, 1));
-        questionButton_2.setOnAction(event -> checkQuestion(questionButton_2, 2));
-        questionButton_3.setOnAction(event -> checkQuestion(questionButton_3, 3));
-        questionButton_4.setOnAction(event -> checkQuestion(questionButton_4, 4));
-
-        HBox hBox = new HBox(5  ,previosButton, nextQuestionButton);
-
-
-        VBox vBox = new VBox(5); // расстояние между всеми элементами
+        questionButton_1.setOnAction(event -> checkQuestion(questionButton_1));
+        questionButton_2.setOnAction(event -> checkQuestion(questionButton_2));
+        questionButton_3.setOnAction(event -> checkQuestion(questionButton_3));
+        questionButton_4.setOnAction(event -> checkQuestion(questionButton_4));
+        HBox hBox = new HBox(5, previosButton, nextQuestionButton);
+        VBox vBox = new VBox(5);
         vBox.getChildren().addAll(questionLabel, questionButton_1, questionButton_2, questionButton_3, questionButton_4,
                 hBox);
-
-        stage.setScene(new Scene(vBox, 1200, 300)); // разрешение при запуске
+        Scene scene = new Scene(vBox, 1200, 300);
+        stage.setScene(scene);
         stage.show();
-        inQuestion(currentQuestion); // запускается метод для показа первого вопроса
     }
 
-    // выводит вопрос, согласно полученному значению
     private static void inQuestion(int in) {
         colorDefaultButton();
-        Question question = arr.get(in);
-        questionLabel.setText(question.keyQuestion());
-        questionButton_1.setText(question.questions().get(0));
-        questionButton_2.setText(question.questions().get(1));
-        questionButton_3.setText(question.questions().get(2));
-        questionButton_4.setText(question.questions().get(3));
+        QuestionDTO questionDTO = arr.get(in);
+        List<String> randQuestionDTO = questionDTO.getAnswers();
+        Collections.shuffle(randQuestionDTO);
+        questionLabel.setText(questionDTO.getIssueTitle());
+        questionButton_1.setText(randQuestionDTO.get(0));
+        questionButton_2.setText(randQuestionDTO.get(1));
+        questionButton_3.setText(randQuestionDTO.get(2));
+        questionButton_4.setText(randQuestionDTO.get(3));
     }
-    // проверяет условие, какая кнопка использована и не выходит ли за предел массива
 
     private static void showQuestion(Button button) {
         if (button.equals(nextQuestionButton) && currentQuestion + 1 < arr.size()) {
@@ -72,13 +69,10 @@ public class Main extends Application {
             inQuestion(--currentQuestion);
         }
     }
-    // добавляет к тексту кнопки правильный или неправильный ответ
-    private static void checkQuestion(Button inButton, int inInt) {
+    // Параметр кнопки для ведения в дальнейшем статистики правильных ответов
+    private static void checkQuestion(Button buttonClick) {
         for (Button button : listButton) {
-            colorButton(button, false);
-        }
-        if (inInt == arr.get(currentQuestion).answer()) {
-            colorButton(inButton, true);
+            colorButton(button, button.getText().equals(arr.get(currentQuestion).getIssueTrue()));
         }
     }
 
@@ -89,8 +83,25 @@ public class Main extends Application {
             in.setStyle("-fx-background-color: red; -fx-text-fill: white;");
         }
     }
+
     private static void colorDefaultButton() {
         listButton.forEach(x -> x.setStyle("-fx-background-color: white; -fx-text-fill: black;"));
+    }
+
+    private static void readQuestionsFromBinFile() {
+        try (FileInputStream fileIn = new FileInputStream("src/main/resources/questions.bin");
+             ObjectInputStream in = new ObjectInputStream(fileIn)) {
+            while (true) {
+                try {
+                    QuestionDTO questionDTO = (QuestionDTO) in.readObject();
+                    Main.arr.add(questionDTO);
+                } catch (EOFException e) {
+                    break;
+                }
+            }
+        } catch (IOException | ClassNotFoundException ex) {
+            ex.fillInStackTrace();
+        }
     }
 
 }
