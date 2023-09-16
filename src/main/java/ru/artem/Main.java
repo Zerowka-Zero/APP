@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Main extends Application {
+    //комент для проверки
     private static final LinkedList<QuestionDTO> arr = new LinkedList<>();
     private static int currentQuestion = 0;
     private static final Label questionLabel = new Label();
