@@ -16,7 +16,7 @@ import java.util.List;
 public class Main extends Application {
     //комент для проверки
     private static final LinkedList<QuestionDTO> arr = new LinkedList<>();
-    private static int currentQuestion = 0;
+    private static int currentQuestion = 1;
     private static final Label questionLabel = new Label();
     private static final Button questionButton_1 = new Button();
     private static final Button questionButton_2 = new Button();
@@ -26,6 +26,9 @@ public class Main extends Application {
             questionButton_3, questionButton_4));
     private static final Button previosButton = new Button("<--- Предыдущий вопрос");
     private static final Button nextQuestionButton = new Button("Следующий вопрос --->");
+
+    private static int correctAnswersCount = 0;
+    private static Button finishButton = new Button("Завершить тестирование");
 
     public static void main(String[] args) {
         readQuestionsFromBinFile();
@@ -49,6 +52,17 @@ public class Main extends Application {
         Scene scene = new Scene(vBox, 1200, 300);
         stage.setScene(scene);
         stage.show();
+
+        finishButton.setOnAction(event -> finishTest());
+        vBox.getChildren().add(finishButton);
+
+    }
+    private static void finishTest() {
+        displayFinalResult();
+        questionButton_1.setDisable(true); // Disable answer buttons
+        questionButton_2.setDisable(true);
+        questionButton_3.setDisable(true);
+        questionButton_4.setDisable(true);
     }
 
     private static void inQuestion(int in) {
@@ -68,11 +82,17 @@ public class Main extends Application {
             inQuestion(++currentQuestion);
         } else if (button.equals(previosButton) && currentQuestion - 1 > -1) {
             inQuestion(--currentQuestion);
+        } else if (button.equals(finishButton)) {
+            finishTest();
         }
     }
-    // Параметр кнопки для ведения в дальнейшем статистики правильных ответов
+
+
     private static void checkQuestion(Button buttonClick) {
         for (Button button : listButton) {
+            if (button.getText().equals(arr.get(currentQuestion).getIssueTrue()) && buttonClick == button) {
+                correctAnswersCount++;
+            }
             colorButton(button, button.getText().equals(arr.get(currentQuestion).getIssueTrue()));
         }
     }
@@ -103,6 +123,18 @@ public class Main extends Application {
         } catch (IOException | ClassNotFoundException ex) {
             ex.fillInStackTrace();
         }
+
     }
+
+    private static void displayFinalResult() {
+        questionLabel.setText("Тестирование завершено.");
+        questionButton_1.setText("Правильных ответов: " + correctAnswersCount);
+        questionButton_2.setText(""); // Clear other buttons
+        questionButton_3.setText("");
+        questionButton_4.setText("");
+        previosButton.setDisable(true);
+        nextQuestionButton.setDisable(true);
+    }
+
 
 }
