@@ -2,6 +2,7 @@ package ru.artem;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -17,6 +18,7 @@ public class Main extends Application {
     //комент для проверки
     private static final LinkedList<QuestionDTO> arr = new LinkedList<>();
     private static int currentQuestion = 1;
+    private static int correctAnswersCount = 0;
     private static final Label questionLabel = new Label();
     private static final Button questionButton_1 = new Button();
     private static final Button questionButton_2 = new Button();
@@ -27,7 +29,6 @@ public class Main extends Application {
     private static final Button previosButton = new Button("<--- Предыдущий вопрос");
     private static final Button nextQuestionButton = new Button("Следующий вопрос --->");
 
-    private static int correctAnswersCount = 0;
     private static Button finishButton = new Button("Завершить тестирование");
 
     public static void main(String[] args) {
@@ -45,16 +46,15 @@ public class Main extends Application {
         questionButton_2.setOnAction(event -> checkQuestion(questionButton_2));
         questionButton_3.setOnAction(event -> checkQuestion(questionButton_3));
         questionButton_4.setOnAction(event -> checkQuestion(questionButton_4));
+        finishButton.setOnAction(event -> finishTest());
         HBox hBox = new HBox(5, previosButton, nextQuestionButton);
         VBox vBox = new VBox(5);
-        vBox.getChildren().addAll(questionLabel, questionButton_1, questionButton_2, questionButton_3, questionButton_4,
-                hBox);
+
+        vBox.getChildren().addAll(questionLabel, questionButton_1, questionButton_2, questionButton_3, questionButton_4,hBox, finishButton);
         Scene scene = new Scene(vBox, 1200, 300);
         stage.setScene(scene);
         stage.show();
 
-        finishButton.setOnAction(event -> finishTest());
-        vBox.getChildren().add(finishButton);
 
     }
     private static void finishTest() {
@@ -127,14 +127,11 @@ public class Main extends Application {
     }
 
     private static void displayFinalResult() {
-        questionLabel.setText("Тестирование завершено.");
-        questionButton_1.setText("Правильных ответов: " + correctAnswersCount);
-        questionButton_2.setText(""); // Clear other buttons
-        questionButton_3.setText("");
-        questionButton_4.setText("");
-        previosButton.setDisable(true);
-        nextQuestionButton.setDisable(true);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Результаты");
+        alert.setHeaderText(null);
+        alert.setContentText("Вы набрали " + correctAnswersCount + " из " + currentQuestion + " баллов.");
+        alert.showAndWait();
     }
-
 
 }
