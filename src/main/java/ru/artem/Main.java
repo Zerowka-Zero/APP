@@ -19,6 +19,7 @@ public class Main extends Application {
     private static final LinkedList<QuestionDTO> arr = new LinkedList<>();
     private static int currentQuestion = 1;
     private static int correctAnswersCount = 0;
+    private static boolean answered = false;
     private static final Label questionLabel = new Label();
     private static final Button questionButton_1 = new Button();
     private static final Button questionButton_2 = new Button();
@@ -66,6 +67,7 @@ public class Main extends Application {
     }
 
     private static void inQuestion(int in) {
+        answered = false; // Сбрасываем флаг ответа на новом вопросе
         colorDefaultButton();
         QuestionDTO questionDTO = arr.get(in);
         List<String> randQuestionDTO = questionDTO.getAnswers();
@@ -77,6 +79,7 @@ public class Main extends Application {
         questionButton_4.setText(randQuestionDTO.get(3));
     }
 
+
     private static void showQuestion(Button button) {
         if (button.equals(nextQuestionButton) && currentQuestion + 1 < arr.size()) {
             inQuestion(++currentQuestion);
@@ -87,15 +90,19 @@ public class Main extends Application {
         }
     }
 
-
     private static void checkQuestion(Button buttonClick) {
-        for (Button button : listButton) {
-            if (button.getText().equals(arr.get(currentQuestion).getIssueTrue()) && buttonClick == button) {
-                correctAnswersCount++;
+        if (!answered) {
+            for (Button button : listButton) {
+                if (button.getText().equals(arr.get(currentQuestion).getIssueTrue()) && buttonClick == button) {
+                    correctAnswersCount++;
+                }
+                colorButton(button, button.getText().equals(arr.get(currentQuestion).getIssueTrue()));
             }
-            colorButton(button, button.getText().equals(arr.get(currentQuestion).getIssueTrue()));
+            answered = true; // Помечаем, что ответ дан
         }
     }
+
+
 
     private static void colorButton(Button in, boolean inB) {
         if (inB) {
